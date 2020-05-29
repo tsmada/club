@@ -1,4 +1,4 @@
-
+// eslint-disable-next-line no-unused-vars
 class Peering {
   constructor(elmID, stream, signals) {
     this.videosElm = document.getElementById(elmID)
@@ -46,7 +46,7 @@ class Peering {
       peer.addTrack(track, this.stream)
     })
 
-    const answer = await peer.createAnswer();
+    const answer = await peer.createAnswer()
     peer.setLocalDescription(answer)
 
     return answer
@@ -76,7 +76,7 @@ class Peering {
 
     this.videosElm.appendChild(video)
 
-    peer.addEventListener('icecandidate', ({candidate}) => {
+    peer.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate) {
         this.signals.sendICECandidate(peerId, candidate)
       }
@@ -108,7 +108,7 @@ class Peering {
     return peer
   }
 
-  onConnected() {}
-  onDisconnected() {}
+  onConnected() { }
+  onDisconnected() { }
 }
 

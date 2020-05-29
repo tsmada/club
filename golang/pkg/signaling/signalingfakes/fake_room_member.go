@@ -12,6 +12,16 @@ type FakeRoomMember struct {
 	closeMutex       sync.RWMutex
 	closeArgsForCall []struct {
 	}
+	GetGroupStub        func() signaling.RoomGroup
+	getGroupMutex       sync.RWMutex
+	getGroupArgsForCall []struct {
+	}
+	getGroupReturns struct {
+		result1 signaling.RoomGroup
+	}
+	getGroupReturnsOnCall map[int]struct {
+		result1 signaling.RoomGroup
+	}
 	IDStub        func() signaling.PeerID
 	iDMutex       sync.RWMutex
 	iDArgsForCall []struct {
@@ -32,6 +42,11 @@ type FakeRoomMember struct {
 	}
 	sendMessageReturnsOnCall map[int]struct {
 		result1 error
+	}
+	SetGroupStub        func(signaling.RoomGroup)
+	setGroupMutex       sync.RWMutex
+	setGroupArgsForCall []struct {
+		arg1 signaling.RoomGroup
 	}
 	TimedoutStub        func() bool
 	timedoutMutex       sync.RWMutex
@@ -68,6 +83,58 @@ func (fake *FakeRoomMember) CloseCalls(stub func()) {
 	fake.closeMutex.Lock()
 	defer fake.closeMutex.Unlock()
 	fake.CloseStub = stub
+}
+
+func (fake *FakeRoomMember) GetGroup() signaling.RoomGroup {
+	fake.getGroupMutex.Lock()
+	ret, specificReturn := fake.getGroupReturnsOnCall[len(fake.getGroupArgsForCall)]
+	fake.getGroupArgsForCall = append(fake.getGroupArgsForCall, struct {
+	}{})
+	fake.recordInvocation("GetGroup", []interface{}{})
+	fake.getGroupMutex.Unlock()
+	if fake.GetGroupStub != nil {
+		return fake.GetGroupStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.getGroupReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeRoomMember) GetGroupCallCount() int {
+	fake.getGroupMutex.RLock()
+	defer fake.getGroupMutex.RUnlock()
+	return len(fake.getGroupArgsForCall)
+}
+
+func (fake *FakeRoomMember) GetGroupCalls(stub func() signaling.RoomGroup) {
+	fake.getGroupMutex.Lock()
+	defer fake.getGroupMutex.Unlock()
+	fake.GetGroupStub = stub
+}
+
+func (fake *FakeRoomMember) GetGroupReturns(result1 signaling.RoomGroup) {
+	fake.getGroupMutex.Lock()
+	defer fake.getGroupMutex.Unlock()
+	fake.GetGroupStub = nil
+	fake.getGroupReturns = struct {
+		result1 signaling.RoomGroup
+	}{result1}
+}
+
+func (fake *FakeRoomMember) GetGroupReturnsOnCall(i int, result1 signaling.RoomGroup) {
+	fake.getGroupMutex.Lock()
+	defer fake.getGroupMutex.Unlock()
+	fake.GetGroupStub = nil
+	if fake.getGroupReturnsOnCall == nil {
+		fake.getGroupReturnsOnCall = make(map[int]struct {
+			result1 signaling.RoomGroup
+		})
+	}
+	fake.getGroupReturnsOnCall[i] = struct {
+		result1 signaling.RoomGroup
+	}{result1}
 }
 
 func (fake *FakeRoomMember) ID() signaling.PeerID {
@@ -182,6 +249,37 @@ func (fake *FakeRoomMember) SendMessageReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeRoomMember) SetGroup(arg1 signaling.RoomGroup) {
+	fake.setGroupMutex.Lock()
+	fake.setGroupArgsForCall = append(fake.setGroupArgsForCall, struct {
+		arg1 signaling.RoomGroup
+	}{arg1})
+	fake.recordInvocation("SetGroup", []interface{}{arg1})
+	fake.setGroupMutex.Unlock()
+	if fake.SetGroupStub != nil {
+		fake.SetGroupStub(arg1)
+	}
+}
+
+func (fake *FakeRoomMember) SetGroupCallCount() int {
+	fake.setGroupMutex.RLock()
+	defer fake.setGroupMutex.RUnlock()
+	return len(fake.setGroupArgsForCall)
+}
+
+func (fake *FakeRoomMember) SetGroupCalls(stub func(signaling.RoomGroup)) {
+	fake.setGroupMutex.Lock()
+	defer fake.setGroupMutex.Unlock()
+	fake.SetGroupStub = stub
+}
+
+func (fake *FakeRoomMember) SetGroupArgsForCall(i int) signaling.RoomGroup {
+	fake.setGroupMutex.RLock()
+	defer fake.setGroupMutex.RUnlock()
+	argsForCall := fake.setGroupArgsForCall[i]
+	return argsForCall.arg1
+}
+
 func (fake *FakeRoomMember) Timedout() bool {
 	fake.timedoutMutex.Lock()
 	ret, specificReturn := fake.timedoutReturnsOnCall[len(fake.timedoutArgsForCall)]
@@ -239,10 +337,14 @@ func (fake *FakeRoomMember) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.closeMutex.RLock()
 	defer fake.closeMutex.RUnlock()
+	fake.getGroupMutex.RLock()
+	defer fake.getGroupMutex.RUnlock()
 	fake.iDMutex.RLock()
 	defer fake.iDMutex.RUnlock()
 	fake.sendMessageMutex.RLock()
 	defer fake.sendMessageMutex.RUnlock()
+	fake.setGroupMutex.RLock()
+	defer fake.setGroupMutex.RUnlock()
 	fake.timedoutMutex.RLock()
 	defer fake.timedoutMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

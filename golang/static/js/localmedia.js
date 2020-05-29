@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line no-unused-vars
 class LocalMedia {
   constructor(id) {
     this.id = id
