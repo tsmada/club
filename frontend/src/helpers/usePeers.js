@@ -2,9 +2,12 @@
 import { useEffect, useState } from 'react'
 
 export default function usePeers(local, signals) {
-  const [peers, setPeers] = useState(null)
+  const [peers1, setPeers] = useState(null)
 
   async function fetchData() {
+  	const peers = {
+      peers: []
+    }
     const newPeer = (peerId) => {
       const config = {
         iceServers: [
@@ -113,5 +116,5 @@ export default function usePeers(local, signals) {
     fetchData()
   }, [fetchData])
 
-  return peers
+  return peers1
 }
