@@ -17,7 +17,7 @@ const App = () => {
   const classes = useStyles()
   const local = useLocalMedia()
   const signals = new SignalingServer()
-  const peers = usePeers(local, signals)
+  const peers = usePeers(useLocalMedia(), signals)
 
   signals.addEventListener('connected', async () => {
     signals.sendJoin()
@@ -40,7 +40,7 @@ const App = () => {
       <main>
         <TopBar />
         <Paper className={classes.root}>
-          {local ? <PersonGridList local={local} peers={peers.peers} /> : null}
+          {local ? <PersonGridList local={local} peers={peers.peers}/> : <div>Loading local stream...</div>}
         </Paper>
       </main>
     </>
