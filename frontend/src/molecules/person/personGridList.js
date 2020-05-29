@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import PersonItem from './personItem'
 
 function PersonGridList({ local, peers }) {
+  // This component is rerendering every tic of the stream
   return (
     <Grid container spacing={2}>
       <Grid key={local.id} item xs={6}>
