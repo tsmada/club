@@ -11,11 +11,11 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-function ClubMember({ mediaStream, muted }) {
+function ClubMember({id, mediaStream, muted }) {
   const classes = useStyles()
   return mediaStream ? (
     <Paper variant='outlined' className={classes.root}>
-      <ClubVideoPlayer mediaStream={mediaStream} muted={muted} />
+      <ClubVideoPlayer id={id} mediaStream={mediaStream} muted={muted} />
       <ClubVideoActions />
     </Paper>
   ) : null
