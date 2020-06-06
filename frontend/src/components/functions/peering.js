@@ -6,13 +6,28 @@ export default class Peering {
     this.signals = signals
     this.offer = null
     this.peers = {}
+    this.senders = []
   }
 
   async onJoin(join) {
+
     let peer = this.getPeer(join.peerId)
 
+
     this.stream.getTracks().forEach((track) => {
-      peer.addTrack(track, this.stream)
+      try {
+        let sender1 = peer.addTrack(track, this.stream)
+        this.senders.push(sender1)
+      } catch {
+        let videoTrack = this.stream.getVideoTracks()[0];
+        console.log(this.peers)
+        let sender = peer.getSenders().find(function(s) {
+        return s.track.id === track.id;
+      });
+      console.log('found sender:', sender);
+      sender.replaceTrack(track);
+      }
+      
     })
 
     const offer = await peer.createOffer({
@@ -43,7 +58,17 @@ export default class Peering {
     peer.setRemoteDescription(offer.offer)
 
     this.stream.getTracks().forEach((track) => {
-      peer.addTrack(track, this.stream)
+      try{
+        let sender = peer.addTrack(track, this.stream)
+        this.senders.push(sender)
+      } catch {
+        let sender = peer.getSenders()
+        console.log('found sender:', sender);
+        // remove all tracks here
+      for (var i = 0; i < sender.length; i++) {
+      peer.removeTrack(sender[i])
+      }
+      }
     })
 
     const answer = await peer.createAnswer()
@@ -103,6 +128,14 @@ export default class Peering {
     }
 
     let peer = this.peers[peerId]
+    // Remove all tracks from senders from peerconnection registry
+    console.log(peer)
+    let sender = peer.getSenders()
+    console.log('found sender:', sender);
+    // remove all tracks here
+    for (var i = 0; i < sender.length; i++) {
+      peer.removeTrack(sender[i])
+    }
     delete this.peers[peerId]
 
     return peer

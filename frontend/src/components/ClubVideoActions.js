@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 
 const actions = [{ icon: <VolumeOffRounded />, name: 'Mute' }]
 
-function ClubVideoActions() {
+function ClubVideoActions(props) {
   const classes = useStyles()
   const [open, setOpen] = useState(false)
 
@@ -26,6 +26,8 @@ function ClubVideoActions() {
   const handleClose = () => {
     setOpen(false)
   }
+
+  console.log(props)
 
   return (
     <SpeedDial
@@ -42,7 +44,7 @@ function ClubVideoActions() {
           icon={action.icon}
           tooltipTitle={action.name}
           tooltipOpen
-          onClick={handleClose}
+          onClick={props.onMute}
         />
       ))}
     </SpeedDial>

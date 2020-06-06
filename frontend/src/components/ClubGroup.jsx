@@ -10,32 +10,56 @@ class ClubGroup extends Component {
       localMediaStream: false,
       remoteMediaStream: false,
       peers: {},
+      mutedStreams: [],
     };
     this.socket = new SignalingServer();
   }
 
-  createMediaStream = async () => {
-    if (this.state.localMediaStream) {
-      let tracks = this.state.localMediaStream.getTracks();
-      for (var i = 0; i < tracks.length; i++) {
-        tracks[i].stop()
-      }
-      return this.setState({
+  stopMediaStream = (stream) => {
+  	if (!stream) {
+      return
+    }
+
+  	let tracks = stream.getTracks();
+    for (var i = 0; i < tracks.length; i++) {
+      tracks[i].stop()
+    }
+
+    this.setState({
         localMediaStream: null,
       })
-    } else {
-      const constraints = { video: true, audio: true };
-      let mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      if (mediaStream) {
-        this.setState({
-          localMediaStream: mediaStream
-        })
-      }
-      const local = document.querySelector('#local')
-      local.srcObject = mediaStream;
+    return stream
+  }
 
-      this.handleConnection()
+  createMediaStream = async () => {
+    const constraints = { video: true, audio: true };
+    let mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (mediaStream) {
+      this.setState({
+        localMediaStream: mediaStream
+      })
     }
+    const local = document.querySelector('#local')
+    local.srcObject = mediaStream;
+
+    this.handleConnection()
+  }
+
+  handleMediaStream = async () => {
+    if (this.state.localMediaStream) {
+      this.stopMediaStream(this.state.localMediaStream)
+    } else {
+      this.createMediaStream()
+    }
+  }
+
+  onMute = (stream) => {
+    let streams = this.state.mutedStreams
+    streams.push(stream)
+
+    this.setState({
+      mutedStreams: streams
+    })
   }
 
   handleConnection = async () => {
@@ -44,7 +68,7 @@ class ClubGroup extends Component {
 
     signals.addEventListener("connected", async (event) => {
         await peers.onConnected()
-
+        await signals.onConnected()
         signals.sendJoin()
       })
 
@@ -75,7 +99,7 @@ class ClubGroup extends Component {
         await peers.onDisconnected()
       })
 
-      signals.connect("ws://localhost:3001/room")
+      signals.connect(this.props.URL)
       this.setState({
         peers
       })
@@ -89,7 +113,12 @@ class ClubGroup extends Component {
     const { localMediaStream, remoteMediaStream } = this.state;
     return (
       <>
-        {localMediaStream && <ClubVideo id="local" mediaStream={localMediaStream} muted={true} />}
+        {localMediaStream &&
+          <>
+          <ClubVideo id="local" mediaStream={localMediaStream} muted={true} onMute={this.onMute}/>
+          <div>You are now {this.state.localMuted ? 'muted':'unmuted'}</div>
+          </>
+        }
         {
           remoteMediaStream ?
             (<>
@@ -98,7 +127,7 @@ class ClubGroup extends Component {
               </div>
             </>) : <div id="videos"><video id="local" autoPlay muted></video></div>
         }
-        <button id="start" onClick={this.createMediaStream}>{!localMediaStream ? 'Start Camera' : 'Stop Camera'}</button>
+        <button id="start" onClick={this.handleMediaStream}>{!localMediaStream ? 'Start Camera' : 'Stop Camera'}</button>
       </>
     );
   }

@@ -83,4 +83,12 @@ export default class SignalingServer extends EventTarget {
   sendICECandidate(peerId, candidate) {
     this.websocket.send(JSON.stringify({ type: "icecandidate", destId: peerId, payload: candidate }))
   }
+
+  onDisconnected() {
+    console.log('Signaling server disconnected from us.')
+  }
+
+  onConnected() {
+    console.log('We are connected to the signaling server.')
+  }
 }

@@ -9,15 +9,11 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-function ClubVideoPlayer({id, mediaStream, muted }) {
-  const videoRef = React.createRef()
+function ClubVideoPlayer({id, muted}) {
   const classes = useStyles()
-  let node = document.querySelector(`#${id}`)
-  console.log(id)
-  console.log(node)
 
   return (
-    <video id={id} srcObject={mediaStream} className={classes.video} autoPlay muted={muted} ref={videoRef}>
+    <video id={id} className={classes.video} autoPlay muted={muted}>
       <track default />
     </video>
   )
