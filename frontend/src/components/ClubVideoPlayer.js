@@ -1,5 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core'
+import VolumeOffRounded from '@material-ui/icons/VolumeOffRounded'
 import PropTypes from 'prop-types'
 
 const useStyles = makeStyles(() => ({
@@ -13,9 +14,12 @@ function ClubVideoPlayer({id, muted}) {
   const classes = useStyles()
 
   return (
+    <>
     <video id={id} className={classes.video} autoPlay muted={muted}>
       <track default />
     </video>
+    {muted ? <VolumeOffRounded /> : null}
+    </>
   )
 }
 

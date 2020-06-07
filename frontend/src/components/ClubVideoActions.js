@@ -27,8 +27,6 @@ function ClubVideoActions(props) {
     setOpen(false)
   }
 
-  console.log(props)
-
   return (
     <SpeedDial
       ariaLabel='Streamer Options'
@@ -44,7 +42,7 @@ function ClubVideoActions(props) {
           icon={action.icon}
           tooltipTitle={action.name}
           tooltipOpen
-          onClick={props.onMute}
+          onClick={() => {props.onMute(props.id)}}
         />
       ))}
     </SpeedDial>

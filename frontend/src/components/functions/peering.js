@@ -9,25 +9,29 @@ export default class Peering {
     this.senders = []
   }
 
-  async onJoin(join) {
-
-    let peer = this.getPeer(join.peerId)
-
-
-    this.stream.getTracks().forEach((track) => {
-      try {
-        let sender1 = peer.addTrack(track, this.stream)
-        this.senders.push(sender1)
-      } catch {
-        let videoTrack = this.stream.getVideoTracks()[0];
-        console.log(this.peers)
-        let sender = peer.getSenders().find(function(s) {
-        return s.track.id === track.id;
-      });
-      console.log('found sender:', sender);
-      sender.replaceTrack(track);
+  /*
+  * Retrieves a RTCRPSender based on an associated
+  * MediaStreamTrack. Useful for removing tracks
+  * from established connections before streaming again.
+   */
+  senderFromTrack(track) {
+    let sender;
+    for (var i = 0; i < this.senders.length; i++) {
+      if (this.senders[i].track === null) {
+        return this.senders[i]
       }
-      
+      if (this.senders[i].track.id === track.id && this.senders[i].track.kind === track.kind) {
+        sender = this.senders[i]
+      }
+    }
+    return sender
+  }
+
+  async onJoin(join) {
+    let peer = this.getPeer(join.peerId)
+    this.stream.getTracks().forEach((track) => {
+      let sender = peer.addTrack(track, this.stream)
+      this.senders.push({peer, sender})
     })
 
     const offer = await peer.createOffer({
@@ -56,19 +60,9 @@ export default class Peering {
   async onOffer(offer) {
     let peer = this.getPeer(offer.peerId)
     peer.setRemoteDescription(offer.offer)
-
     this.stream.getTracks().forEach((track) => {
-      try{
-        let sender = peer.addTrack(track, this.stream)
-        this.senders.push(sender)
-      } catch {
-        let sender = peer.getSenders()
-        console.log('found sender:', sender);
-        // remove all tracks here
-      for (var i = 0; i < sender.length; i++) {
-      peer.removeTrack(sender[i])
-      }
-      }
+      let sender = peer.addTrack(track, this.stream)
+      this.senders.push({peer, sender})
     })
 
     const answer = await peer.createAnswer()
@@ -85,6 +79,42 @@ export default class Peering {
   async onICECandidate(candidate) {
     let peer = this.getPeer(candidate.peerId)
     peer.addIceCandidate(candidate.candidate)
+  }
+
+  onConnectionStateChange (event) {
+    console.log('onConnectionStateChange:', event);
+    switch(event.target.connectionState) {
+      case "new":
+        console.log("New Connection coming...");
+        break;
+      case "connecting":
+        console.log("Connecting...");
+        break;
+      case "connected":
+        console.log("Online");
+        break;
+      case "disconnected":
+        console.log("Disconnecting...");
+        break;
+      case "closed":
+        console.log("Offline");
+        break;
+      case "failed":
+        console.log("Error");
+        break;
+      default:
+        console.log("Unknown");
+        break;
+    }
+  }
+
+  async onNegotiationNeded (event) {
+    console.log('Negotiation needed: ', event)
+    let offer = await event.target.createOffer({
+      offerToReceiveVideo: 1,
+      offerToReceiveAudio: 1,
+    })
+    await event.target.setLocalDescription(offer)
   }
 
   newPeer(peerId) {
@@ -107,6 +137,9 @@ export default class Peering {
       }
     })
 
+    peer.addEventListener('connectionstatechange', this.onConnectionStateChange)
+    peer.addEventListener('negotiationneeded', this.onNegotiationNeded)
+
     peer.addEventListener("track", (track) => {
       video.srcObject = track.streams[0]
     })
@@ -128,14 +161,6 @@ export default class Peering {
     }
 
     let peer = this.peers[peerId]
-    // Remove all tracks from senders from peerconnection registry
-    console.log(peer)
-    let sender = peer.getSenders()
-    console.log('found sender:', sender);
-    // remove all tracks here
-    for (var i = 0; i < sender.length; i++) {
-      peer.removeTrack(sender[i])
-    }
     delete this.peers[peerId]
 
     return peer

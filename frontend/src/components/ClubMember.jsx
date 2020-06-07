@@ -16,7 +16,7 @@ function ClubMember({id, mediaStream, muted, onMute }) {
   return mediaStream ? (
     <Paper variant='outlined' className={classes.root}>
       <ClubVideoPlayer id={id} mediaStream={mediaStream} muted={muted} />
-      <ClubVideoActions onMute={onMute} />
+      <ClubVideoActions id={id} onMute={onMute} />
     </Paper>
   ) : null
 }
