@@ -30,6 +30,9 @@ export default class Peering {
   async onJoin(join) {
     let peer = this.getPeer(join.peerId)
     this.stream.getTracks().forEach((track) => {
+      // Adding this track without checking if senders exist for this peer
+      // and removing the existing senders will result in an InvalidAccessError
+      console.log(peer.getSenders())
       let sender = peer.addTrack(track, this.stream)
       this.senders.push({peer, sender})
     })
@@ -61,8 +64,23 @@ export default class Peering {
     let peer = this.getPeer(offer.peerId)
     peer.setRemoteDescription(offer.offer)
     this.stream.getTracks().forEach((track) => {
-      let sender = peer.addTrack(track, this.stream)
-      this.senders.push({peer, sender})
+      // Adding this track without checking if senders exist for this peer
+      // and removing the existing senders will result in an InvalidAccessError
+      console.log(peer.getSenders())
+      try {
+        let sender = peer.addTrack(track, this.stream)
+        this.senders.push({peer, sender})
+      } catch (InvalidAccessError) {
+        let s = peer.getSenders()
+        for (var i = 0; i < s.length; i++) {
+          if (s[i].track) {
+            console.log(s[i].track)
+            peer.removeTrack(s[i])
+          }
+        }
+        let newSender = peer.addTrack(track, this.stream)
+        this.senders.push({peer, sender: newSender})
+      }
     })
 
     const answer = await peer.createAnswer()
